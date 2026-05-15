@@ -187,22 +187,18 @@ extension AppLocaleExt on AppLocale {
     return LocaleSettings.instance.translationMap[this]?.localeName ?? 'Loading...';
   }
 
-  static List<AppLocale> get allowedValues => AppLocale.values
-      .where(
-        (l) => [
-          // Other languages are disabled until they reach at least 80% of completion
-          // en and ru first, others in alphabetical order
-          //
-          /* English */ AppLocale.en,
-          /* Russian */ AppLocale.ruRu,
-          //
-          /* Chinese */ AppLocale.zhCn,
-          /* German */ AppLocale.deDe,
-          /* Japanese */ AppLocale.jaJp,
-          /* Turkish */ AppLocale.trTr,
-        ].any((allowedL) => allowedL == l),
-      )
-      .toList();
+  static List<AppLocale> get allowedValues => [
+    // Other languages are disabled until they reach at least 80% of completion
+    // en and ru first, others in alphabetical order
+    //
+    /* English */ AppLocale.en,
+    /* Russian */ AppLocale.ruRu,
+    //
+    /* Chinese */ AppLocale.zhCn,
+    /* German */ AppLocale.deDe,
+    /* Japanese */ AppLocale.jaJp,
+    /* Turkish */ AppLocale.trTr,
+  ];
 }
 
 class _SecondLanguageFlagClipper extends CustomClipper<Path> {
