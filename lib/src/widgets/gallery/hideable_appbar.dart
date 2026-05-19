@@ -330,7 +330,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
         icon = Icons.save;
         break;
       case .favourite:
-        // icon = isFav == true ? Icons.favorite : Icons.favorite_border;
         // early return to override with animated icon
         return Obx(() {
           if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
