@@ -63,6 +63,8 @@ Release - 2.5.1+5211:
 
 - Added Chinese (Simplified) and German localization
 - Fixed some layout issues
+- Fixed auto leave dialog on captcha completion appearing again after you decided to stay
+- Possible fix of broken screen orientation after leaving fullscreen video
 
 -------------------
 
@@ -168,11 +170,6 @@ Fixes:
 
 
 and other small fixes and changes...
-
--------------------
-
-Known issues:
-- Rendering may break after changing screen orientation (i.e. by opening video in fullscreen), can be fixed by changing screen orientation back and forth/reentering video fullscreen
 ''',
   );
 }
