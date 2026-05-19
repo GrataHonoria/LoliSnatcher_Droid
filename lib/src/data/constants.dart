@@ -65,6 +65,7 @@ Release - 2.5.1+5211:
 - Fixed some layout issues
 - Fixed auto leave dialog on captcha completion appearing again after you decided to stay
 - Possible fix of broken screen orientation after leaving fullscreen video
+- Fixed some jpeg images failing to load
 
 -------------------
 

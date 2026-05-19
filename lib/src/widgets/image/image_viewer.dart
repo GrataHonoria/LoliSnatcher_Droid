@@ -166,7 +166,10 @@ class ImageViewerState extends State<ImageViewer> {
               : null,
         );
       } else {
-        stopLoading(reason: .error);
+        stopLoading(
+          reason: .error,
+          details: error.toString(),
+        );
       }
     }
   }
