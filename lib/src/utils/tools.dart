@@ -425,7 +425,6 @@ class Tools {
 
     return false;
   }
-}
 
   static String? urlJoin(String? base, String? segment) {
     if (base == null) return segment;
