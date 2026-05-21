@@ -219,7 +219,7 @@ class _TagViewState extends State<TagView> {
       hasLoadItemSupport = handler.hasLoadItemSupport;
       canLoadItemOnStart = handler.shouldUpdateIteminTagView;
       checkForPossibleBooruHandler();
-      setState(() {});
+      if (mounted) setState(() {});
     }
   }
 
@@ -243,7 +243,7 @@ class _TagViewState extends State<TagView> {
     if (hasLoadItemSupport && (!initial || canLoadItemOnStart) && (!item.isUpdated || force)) {
       loadingUpdate = true;
       failedUpdate = false;
-      setState(() {});
+      if (mounted) setState(() {});
       cancelToken = CancelToken();
       try {
         final res = await (possibleBooruHandler ?? handler).loadItem(
@@ -269,7 +269,7 @@ class _TagViewState extends State<TagView> {
         failedUpdate = true;
       }
       loadingUpdate = false;
-      setState(() {});
+      if (mounted) setState(() {});
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => parseSortGroupTags(),
       );
@@ -389,7 +389,7 @@ class _TagViewState extends State<TagView> {
     if (updateCache) {
       await cacheTabMatchData();
     }
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   void searchFocusListener() {
@@ -1709,48 +1709,65 @@ class SourceLinkErrorDialog extends StatelessWidget {
     return AlertDialog(
       title: Text(context.loc.tagView.sourceDialogTitle),
       scrollable: true,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 16),
-          if (detectedUrls.isNotEmpty) ...[
-            Text(
-              context.loc.tagView.detectedLinks,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 4),
-            ...detectedUrls.map(
-              (url) => ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.link, size: 20),
-                title: Text(url, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14)),
-                onTap: () async {
-                  final ok = await launchUrlString(
-                    url,
-                    mode: LaunchMode.externalApplication,
-                  );
-                  if (!ok) {
-                    FlashElements.showSnackbar(
-                      title: Text(context.loc.failedToOpenLink),
-                      content: Text(url),
+      insetPadding: const EdgeInsets.all(16),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: .min,
+          crossAxisAlignment: .start,
+          children: [
+            const SizedBox(height: 16),
+            if (detectedUrls.isNotEmpty) ...[
+              Text(
+                context.loc.tagView.detectedLinks,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 4),
+              ...detectedUrls.map(
+                (url) => InkWell(
+                  onTap: () async {
+                    final ok = await launchUrlString(
+                      url,
+                      mode: LaunchMode.externalApplication,
                     );
-                  }
-                },
+                    if (!ok) {
+                      FlashElements.showSnackbar(
+                        title: Text(context.loc.failedToOpenLink),
+                        content: Text(url),
+                      );
+                    }
+                  },
+                  child: SizedBox(
+                    height: 50,
+                    child: Row(
+                      spacing: 12,
+                      children: [
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.link,
+                          size: 20,
+                        ),
+                        Expanded(
+                          child: DraggableOverflowText(url),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            ParsedText(
+              text: link,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
           ],
-          ParsedText(
-            text: link,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
+        ),
       ),
       actionsOverflowDirection: VerticalDirection.down,
       actionsOverflowButtonSpacing: 8,
@@ -1868,12 +1885,12 @@ class _TagContentPreviewState extends State<TagContentPreview> {
 
     if (tab!.booruHandler.locked && !isLastPage) {
       isLastPage = true;
-      setState(() {});
+      if (mounted) setState(() {});
     }
 
     if (tab!.booruHandler.errorString.isNotEmpty) {
       errorString = tab!.booruHandler.errorString;
-      setState(() {});
+      if (mounted) setState(() {});
     }
 
     if (tab!.booruHandler.totalCount.value == 0) {
@@ -1882,9 +1899,9 @@ class _TagContentPreviewState extends State<TagContentPreview> {
 
     Future.delayed(const Duration(milliseconds: 200), () {
       loading = false;
-      setState(() {});
+      if (mounted) setState(() {});
     });
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> onPreviewTap(int index) async {
