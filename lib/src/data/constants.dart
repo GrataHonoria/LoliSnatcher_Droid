@@ -73,6 +73,7 @@ Release - 2.5.1+5211:
 - Hydrus OR query handling (Thanks to hekate)
 - Improved autodetect logic for some boorus
 - Fixed favourites/downloads booru options not appearing after adding first booru config until app is restarted
+- Fixed viewer toolbar buttons setting not resetting correctly
 
 -------------------
 
