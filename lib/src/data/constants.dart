@@ -71,6 +71,8 @@ Release - 2.5.1+5211:
 - Fixed some jpeg images failing to load
 - Fixed duplicates and random sorting of tags on r34xxx
 - Hydrus OR query handling (Thanks to hekate)
+- Improved autodetect logic for some boorus
+- Fixed favourites/downloads booru options not appearing after adding first booru config until app is restarted
 
 -------------------
 
@@ -95,7 +97,7 @@ Hotfix 1 - 2.5.0+5209 (31.03.2026):
 
 -------------------
 
-Release - 2.5.0+5208 (30.03.2026):
+Previous release - 2.5.0+5208 (30.03.2026):
 
 Main in this update:
 - Localization (Russian, Turkish, Japanese)
