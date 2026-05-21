@@ -61,8 +61,15 @@ class _LoliControlsState extends State<LoliControls> {
   static const double _longTapMaxPlaybackSpeed = 4;
   static const double _longTapSlowdownDeadZone = 24;
   static const double _longTapSpeedChangeTolerance = 0.05;
+  static const double _longTapMinReverseSpeed = 1;
+  static const double _longTapMaxReverseSpeed = 4;
+  static const double _longTapReverseSpeedChangeTolerance = 0.1;
   static const Duration _longTapSpeedChangeDebounce = Duration(milliseconds: 200);
+  static const Duration _longTapReverseTick = Duration(milliseconds: 100);
   double longTapPlaybackSpeed = _longTapBasePlaybackSpeed;
+  Timer? longTapReverseTimer;
+  bool longTapReversing = false;
+  double longTapReverseSpeed = _longTapMinReverseSpeed;
   int pointerCount = 0;
   bool speedSetManually = false;
   TapDownDetails? _doubleTapInfo;
@@ -153,9 +160,12 @@ class _LoliControlsState extends State<LoliControls> {
     speedSetManually = false;
     _doubleTapExtraMessage = '';
     longTapPlaybackSpeed = _longTapBasePlaybackSpeed;
+    longTapReversing = false;
+    longTapReverseSpeed = _longTapMinReverseSpeed;
 
     _doubleTapHideTimer?.cancel();
     longTapSpeedChangeDelayTimer?.cancel();
+    longTapReverseTimer?.cancel();
     _hideTimer?.cancel();
     _initTimer?.cancel();
     _showAfterExpandCollapseTimer?.cancel();
@@ -982,6 +992,7 @@ class _LoliControlsState extends State<LoliControls> {
       holdingDown = true;
       speedSetManually = false;
       longTapPlaybackSpeed = _longTapBasePlaybackSpeed;
+      _stopLongTapReverse();
       _doubleTapExtraMessage = '${longTapPlaybackSpeed.toStringAsFixed(1)}x';
       controller.setPlaybackSpeed(longTapPlaybackSpeed);
       _lastDoubleTapSide = 1;
@@ -990,17 +1001,46 @@ class _LoliControlsState extends State<LoliControls> {
 
   void onHitAreaLongPressMove(LongPressMoveUpdateDetails details) {
     setState(() {
-      final double newLongTapPlaybackSpeed = _getLongTapPlaybackSpeed(details.offsetFromOrigin.dx);
-      if ((newLongTapPlaybackSpeed - longTapPlaybackSpeed).abs() < _longTapSpeedChangeTolerance) {
+      final ({double? playbackSpeed, double? reverseSpeed}) longTapMode = _getLongTapMode(
+        details.offsetFromOrigin.dx,
+      );
+
+      final double? newLongTapReverseSpeed = longTapMode.reverseSpeed;
+      if (newLongTapReverseSpeed != null) {
+        final bool reachedMaxReverseSpeed =
+            newLongTapReverseSpeed == _longTapMaxReverseSpeed && longTapReverseSpeed != _longTapMaxReverseSpeed;
+        if (longTapReversing &&
+            !reachedMaxReverseSpeed &&
+            (newLongTapReverseSpeed - longTapReverseSpeed).abs() < _longTapReverseSpeedChangeTolerance) {
+          return;
+        }
+
+        longTapReverseSpeed = newLongTapReverseSpeed;
+        longTapPlaybackSpeed = _longTapMinPlaybackSpeed;
+        doubleTapped = false;
+        holdingDown = true;
+        speedSetManually = false;
+        _doubleTapExtraMessage = '-${longTapReverseSpeed.toStringAsFixed(1)}x';
+        _lastDoubleTapSide = -1;
+        _startLongTapReverse();
         return;
       }
 
+      final double newLongTapPlaybackSpeed = longTapMode.playbackSpeed ?? _longTapBasePlaybackSpeed;
+      _lastDoubleTapSide = 1;
+
+      if (!longTapReversing && (newLongTapPlaybackSpeed - longTapPlaybackSpeed).abs() < _longTapSpeedChangeTolerance) {
+        return;
+      }
+
+      _stopLongTapReverse(resumePlayback: true);
       longTapPlaybackSpeed = newLongTapPlaybackSpeed;
       // update ui value immediately, real speed change will happen in a timer below
       doubleTapped = false;
       holdingDown = true;
       speedSetManually = false;
       _doubleTapExtraMessage = '${longTapPlaybackSpeed.toStringAsFixed(1)}x';
+      _lastDoubleTapSide = 1;
 
       longTapSpeedChangeDelayTimer?.cancel();
       longTapSpeedChangeDelayTimer = Timer(
@@ -1021,34 +1061,84 @@ class _LoliControlsState extends State<LoliControls> {
     });
   }
 
-  double _getLongTapPlaybackSpeed(double dragOffset) {
+  ({double? playbackSpeed, double? reverseSpeed}) _getLongTapMode(double dragOffset) {
     final double speedStepDistance = MediaQuery.sizeOf(context).width / 8;
 
     if (dragOffset >= 0) {
       // Swiping 1/8th of the screen from the starting point adds +1 to the base speed, up to 4x.
-      return (_longTapBasePlaybackSpeed + dragOffset / speedStepDistance).clamp(
-        _longTapBasePlaybackSpeed,
-        _longTapMaxPlaybackSpeed,
+      return (
+        playbackSpeed: (_longTapBasePlaybackSpeed + dragOffset / speedStepDistance).clamp(
+          _longTapBasePlaybackSpeed,
+          _longTapMaxPlaybackSpeed,
+        ),
+        reverseSpeed: null,
       );
     }
 
     final double slowdownOffset = (-dragOffset - _longTapSlowdownDeadZone).clamp(0, double.infinity);
     if (slowdownOffset == 0) {
-      return _longTapBasePlaybackSpeed;
+      return (playbackSpeed: _longTapBasePlaybackSpeed, reverseSpeed: null);
     }
 
-    // Left drag has a short dead zone, then moves directly from 2x down to 0.25x.
     final double slowdownProgress = slowdownOffset / speedStepDistance;
-    return (_longTapBasePlaybackSpeed - slowdownProgress * (_longTapBasePlaybackSpeed - _longTapMinPlaybackSpeed))
-        .clamp(_longTapMinPlaybackSpeed, _longTapBasePlaybackSpeed);
+    if (slowdownProgress <= 1) {
+      // Left drag has a short dead zone, then moves directly from 2x down to min speed.
+      return (
+        playbackSpeed:
+            (_longTapBasePlaybackSpeed - slowdownProgress * (_longTapBasePlaybackSpeed - _longTapMinPlaybackSpeed))
+                .clamp(_longTapMinPlaybackSpeed, _longTapBasePlaybackSpeed),
+        reverseSpeed: null,
+      );
+    }
+
+    final double reverseOffset = slowdownOffset - speedStepDistance - _longTapSlowdownDeadZone;
+    if (reverseOffset <= 0) {
+      return (playbackSpeed: _longTapMinPlaybackSpeed, reverseSpeed: null);
+    }
+
+    final double reverseProgress = reverseOffset / speedStepDistance;
+    return (
+      playbackSpeed: null,
+      reverseSpeed: (_longTapMinReverseSpeed + reverseProgress * (_longTapMaxReverseSpeed - _longTapMinReverseSpeed))
+          .clamp(_longTapMinReverseSpeed, _longTapMaxReverseSpeed),
+    );
+  }
+
+  void _startLongTapReverse() {
+    longTapSpeedChangeDelayTimer?.cancel();
+    if (!longTapReversing) {
+      controller.setPlaybackSpeed(1);
+      controller.pause();
+    }
+
+    longTapReversing = true;
+    longTapReverseTimer ??= Timer.periodic(_longTapReverseTick, (_) {
+      final int currentPosition = controller.value.position.inMilliseconds;
+      final int seekOffset = (_longTapReverseTick.inMilliseconds * longTapReverseSpeed).round();
+      final int newPosition = max(0, currentPosition - seekOffset);
+      controller.seekTo(Duration(milliseconds: newPosition));
+    });
+  }
+
+  void _stopLongTapReverse({bool resumePlayback = false}) {
+    final bool wasReversing = longTapReversing;
+    longTapReverseTimer?.cancel();
+    longTapReverseTimer = null;
+    longTapReversing = false;
+
+    if (resumePlayback && wasReversing && controller.value.isInitialized) {
+      controller.play();
+    }
   }
 
   void onHitAreaLongPressUp() {
     setState(() {
       // reset speed and start all hide timers
       longTapSpeedChangeDelayTimer?.cancel();
+      _stopLongTapReverse(resumePlayback: true);
       holdingDown = false;
       longTapPlaybackSpeed = _longTapBasePlaybackSpeed;
+      longTapReverseSpeed = _longTapMinReverseSpeed;
       if (!speedSetManually) {
         controller.setPlaybackSpeed(1);
         _cancelAndRestartTimer();

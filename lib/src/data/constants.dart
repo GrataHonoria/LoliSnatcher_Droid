@@ -57,12 +57,15 @@ If you encounter any issues or have suggestions, please post them in GitHub issu
 [WE NEED YOUR HELP]: We are looking for volunteers to help us translate the app into other languages. For details, visit our GitHub page or Discord server.
 
 
+A minor update aimed at adding new localization languages and fixing some issues.
+
 -------------------
 
 Release - 2.5.1+5211:
 
 - Added Chinese (Simplified) and German localization
 - Possible fix of broken screen orientation after leaving fullscreen video
+- Adjusted long tap-drag logic on videos, added ability to slowdown and reverse video playback (reverse quality depends on the selected video backend setting)
 - Fixed some layout issues
 - Fixed auto leave dialog on captcha completion appearing again on new page load after you decided to stay
 - Fixed some jpeg images failing to load
