@@ -83,7 +83,13 @@ class RealbooruHandler extends BooruHandler {
     bool withCapcthaCheck = false,
   }) async {
     try {
-      final response = await DioNetwork.get(item.postURL, headers: getHeaders());
+      final response = await DioNetwork.get(
+        item.postURL,
+        headers: {
+          ...getHeaders(),
+          'Referer': '${item.postURL}',
+        },
+      );
       if (response.statusCode != 200) {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
@@ -135,13 +141,6 @@ class RealbooruHandler extends BooruHandler {
   String getHashFromURL(String url) {
     final String hash = url.substring(url.lastIndexOf('_') + 1, url.lastIndexOf('.'));
     return hash;
-  }
-
-  @override
-  Map<String, String> getHeaders() {
-    return {
-      'Referer': '${booru.baseURL}/index.php?page=post&s=view&id=995243',
-    };
   }
   
   @override
