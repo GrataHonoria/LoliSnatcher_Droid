@@ -83,7 +83,7 @@ class RealbooruHandler extends BooruHandler {
     bool withCapcthaCheck = false,
   }) async {
     try {
-      final response = await DioNetwork.get(item.postURL, headers: getHeaders());
+      final response = await DioNetwork.get(item.postURL, headers: getHeaders(item.postURL));
       if (response.statusCode != 200) {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
@@ -138,9 +138,9 @@ class RealbooruHandler extends BooruHandler {
   }
 
   @override
-  Map<String, String> getHeaders() {
+  Map<String, String> getHeaders(string url) {
     return {
-      'Referer': '${item.postURL}',
+      'Referer': '$url',
     };
   }
   
