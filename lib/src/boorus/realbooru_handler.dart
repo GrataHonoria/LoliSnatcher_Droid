@@ -53,16 +53,27 @@ class RealbooruHandler extends BooruHandler {
           : tags.contains('video') || (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
           ? MediaType.video
           : null;
-
+      
+      Logger.Inst().log(
+        'The thumbURL is: ${thumbURL}',
+        'RealbooruHandler',
+        'parseItemFromResponse',
+        LogTypes.imageInfo,
+      );
+      
       String fullURL = thumbURL
           .replaceFirst('thumbnail', 'image')
           .replaceFirst('thumbnail_', '')
           .replaceFirst('.jpg', '.jpeg');
       if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
       
-      final talker = Talker();
-      talker.info('The full URL is: $fullURL');
-
+      Logger.Inst().log(
+        'The fullURL is: ${fullURL}',
+        'RealbooruHandler',
+        'parseItemFromResponse',
+        LogTypes.imageInfo,
+      );
+      
       final BooruItem item = BooruItem(
         fileURL: fullURL,
         sampleURL: fullURL,
@@ -98,6 +109,13 @@ class RealbooruHandler extends BooruHandler {
         if (div == null) {
           return (item: null, failed: true, error: 'Failed to parse html');
         }
+      
+        Logger.Inst().log(
+          'The item.fileURL before is: ${item.fileURL}',
+          'RealbooruHandler',
+          'loadItem',
+          LogTypes.imageInfo,
+        );
 
         item.fileURL = div.attributes['src'] ?? div.children.firstOrNull?.attributes['src'] ?? item.fileURL;
         item.sampleURL = div.attributes['src'] ?? div.attributes['poster'] ?? item.sampleURL;
@@ -109,9 +127,13 @@ class RealbooruHandler extends BooruHandler {
         item.fileExt = Tools.getFileExt(item.fileURL);
         item.possibleMediaType.value = null;
         item.mediaType.value = MediaType.fromExtension(item.fileExt);
-        
-        final talker = Talker();
-        talker.info('The full item URL is: $item.fileURL');
+      
+        Logger.Inst().log(
+          'The item.fileURL after is: ${item.fileURL}',
+          'RealbooruHandler',
+          'loadItem',
+          LogTypes.imageInfo,
+        );
         
         final sidebar = html.getElementById('tagLink');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('copyright'));
