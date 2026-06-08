@@ -138,6 +138,11 @@ class RealbooruHandler extends BooruHandler {
   }
 
   @override
+  Map<String, String> getHeaders() {
+    return 'Referer': '${item.postURL}';
+  }
+  
+  @override
   String makePostURL(String id) {
     return '${booru.baseURL}/index.php?page=post&s=view&id=$id';
   }
