@@ -14,7 +14,6 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 
 class RealbooruHandler extends BooruHandler {
   RealbooruHandler(super.booru, super.limit);
-  final talker = Talker();
   
   @override
   String validateTags(String tags) {
@@ -40,6 +39,7 @@ class RealbooruHandler extends BooruHandler {
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
     final current = responseItem.children[0];
+  
     if (current.firstChild!.attributes['src'] != null) {
       final String id = current.attributes['id']!.replaceAll('p', '');
       final String thumbURL = current.firstChild!.attributes['src']!;
@@ -60,6 +60,7 @@ class RealbooruHandler extends BooruHandler {
           .replaceFirst('.jpg', '.jpeg');
       if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
       
+      final talker = Talker();
       talker.info('The full URL is: $fullURL');
 
       final BooruItem item = BooruItem(
@@ -109,6 +110,7 @@ class RealbooruHandler extends BooruHandler {
         item.possibleMediaType.value = null;
         item.mediaType.value = MediaType.fromExtension(item.fileExt);
         
+        final talker = Talker();
         talker.info('The full item URL is: $item.fileURL');
         
         final sidebar = html.getElementById('tagLink');
