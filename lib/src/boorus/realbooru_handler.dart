@@ -138,7 +138,7 @@ class RealbooruHandler extends BooruHandler {
   }
 
   @override
-  Map<String, String> getHeaders(string url) {
+  Map<String, String> getHeaders(String url) {
     return {
       'Referer': '$url',
     };
