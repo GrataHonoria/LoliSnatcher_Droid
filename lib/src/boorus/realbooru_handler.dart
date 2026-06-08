@@ -139,7 +139,9 @@ class RealbooruHandler extends BooruHandler {
 
   @override
   Map<String, String> getHeaders() {
-    return 'Referer': '${item.postURL}';
+    return {
+      'Referer': '${item.postURL}',
+    };
   }
   
   @override
