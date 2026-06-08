@@ -57,6 +57,8 @@ class RealbooruHandler extends BooruHandler {
           .replaceFirst('thumbnail_', '')
           .replaceFirst('.jpg', '.jpeg');
       if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
+      
+      Logger.Inst().log('The full URL is: ${fullURL}');
 
       final BooruItem item = BooruItem(
         fileURL: fullURL,
