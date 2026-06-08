@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:talker/talker.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
@@ -13,7 +14,8 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 
 class RealbooruHandler extends BooruHandler {
   RealbooruHandler(super.booru, super.limit);
-
+  final talker = Talker();
+  
   @override
   String validateTags(String tags) {
     if (tags == ' ' || tags == '') {
@@ -58,7 +60,7 @@ class RealbooruHandler extends BooruHandler {
           .replaceFirst('.jpg', '.jpeg');
       if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
       
-      print('The full URL is: $fullURL');
+      talker.info('The full URL is: $fullURL');
 
       final BooruItem item = BooruItem(
         fileURL: fullURL,
@@ -106,7 +108,9 @@ class RealbooruHandler extends BooruHandler {
         item.fileExt = Tools.getFileExt(item.fileURL);
         item.possibleMediaType.value = null;
         item.mediaType.value = MediaType.fromExtension(item.fileExt);
-        print('The full item URL is: $item.fileURL');
+        
+        talker.info('The full item URL is: $item.fileURL');
+        
         final sidebar = html.getElementById('tagLink');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('copyright'));
         addTagsWithType(copyrightTags, TagType.copyright);
