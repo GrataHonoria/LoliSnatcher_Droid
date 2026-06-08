@@ -58,7 +58,7 @@ class RealbooruHandler extends BooruHandler {
           .replaceFirst('.jpg', '.jpeg');
       if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
       
-      Logger.Inst().log('The full URL is: ${fullURL}');
+      print('The full URL is: $fullURL');
 
       final BooruItem item = BooruItem(
         fileURL: fullURL,
@@ -106,7 +106,7 @@ class RealbooruHandler extends BooruHandler {
         item.fileExt = Tools.getFileExt(item.fileURL);
         item.possibleMediaType.value = null;
         item.mediaType.value = MediaType.fromExtension(item.fileExt);
-
+        print('The full item URL is: $item.fileURL');
         final sidebar = html.getElementById('tagLink');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('copyright'));
         addTagsWithType(copyrightTags, TagType.copyright);
