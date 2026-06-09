@@ -69,9 +69,9 @@ class RealbooruHandler extends BooruHandler {
       
       Logger.Inst().log(
         'The fullURL is: ${fullURL}',
-        'RealbooruHandler',
+        className,
         'parseItemFromResponse',
-        LogTypes.imageInfo,
+        LogTypes.booruHandlerInfo,
       );
       
       final BooruItem item = BooruItem(
@@ -112,9 +112,9 @@ class RealbooruHandler extends BooruHandler {
       
         Logger.Inst().log(
           'The item.fileURL before is: ${item.fileURL}',
-          'RealbooruHandler',
+          className,
           'loadItem',
-          LogTypes.imageInfo,
+          LogTypes.booruHandlerInfo,
         );
 
         item.fileURL = div.attributes['src'] ?? div.children.firstOrNull?.attributes['src'] ?? item.fileURL;
@@ -130,9 +130,9 @@ class RealbooruHandler extends BooruHandler {
       
         Logger.Inst().log(
           'The item.fileURL after is: ${item.fileURL}',
-          'RealbooruHandler',
+          className,
           'loadItem',
-          LogTypes.imageInfo,
+          LogTypes.booruHandlerInfo,
         );
         
         final sidebar = html.getElementById('tagLink');
