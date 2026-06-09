@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:talker/talker.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
@@ -39,7 +38,6 @@ class RealbooruHandler extends BooruHandler {
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
     final current = responseItem.children[0];
-  
     if (current.firstChild!.attributes['src'] != null) {
       final String id = current.attributes['id']!.replaceAll('p', '');
       final String thumbURL = current.firstChild!.attributes['src']!;
@@ -54,12 +52,12 @@ class RealbooruHandler extends BooruHandler {
           ? MediaType.video
           : null;
       
-      Logger.Inst().log(
+      /* Logger.Inst().log(
         'The thumbURL is: ${thumbURL}',
         'RealbooruHandler',
         'parseItemFromResponse',
         LogTypes.imageInfo,
-      );
+      ); */
       
       String fullURL = thumbURL
           .replaceFirst('thumbnail', 'image')
@@ -67,15 +65,15 @@ class RealbooruHandler extends BooruHandler {
           .replaceFirst('.jpg', '.jpeg');
       if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
       
-      Logger.Inst().log(
+      /*Logger.Inst().log(
         'The fullURL is: ${fullURL}',
         className,
         'parseItemFromResponse',
         LogTypes.booruHandlerInfo,
-      );
+      );*/
       
       final BooruItem item = BooruItem(
-        fileURL: 'Newfag.com/fag',
+        fileURL: fullURL,
         sampleURL: fullURL,
         thumbnailURL: thumbURL,
         tagsList: tags.map(Tag.new).toList(),
@@ -110,15 +108,14 @@ class RealbooruHandler extends BooruHandler {
           return (item: null, failed: true, error: 'Failed to parse html');
         }
       
-        Logger.Inst().log(
+        /*Logger.Inst().log(
           'The item.fileURL before is: ${item.fileURL}',
           className,
           'loadItem',
           LogTypes.booruHandlerInfo,
-        );
+        );*/
 
-        //item.fileURL = div.attributes['src'] ?? div.children.firstOrNull?.attributes['src'] ?? item.fileURL;
-        item.fileURL = 'Newfag.com/fag2';
+        item.fileURL = div.attributes['src'] ?? div.children.firstOrNull?.attributes['src'] ?? item.fileURL;
         item.sampleURL = div.attributes['src'] ?? div.attributes['poster'] ?? item.sampleURL;
         item.fileHeight = double.tryParse(div.attributes['height'] ?? '');
         item.fileWidth = double.tryParse(div.attributes['width'] ?? '');
@@ -129,12 +126,12 @@ class RealbooruHandler extends BooruHandler {
         item.possibleMediaType.value = null;
         item.mediaType.value = MediaType.fromExtension(item.fileExt);
       
-        Logger.Inst().log(
+        /*Logger.Inst().log(
           'The item.fileURL after is: ${item.fileURL}',
           className,
           'loadItem',
           LogTypes.booruHandlerInfo,
-        );
+        );*/
         
         final sidebar = html.getElementById('tagLink');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('copyright'));
