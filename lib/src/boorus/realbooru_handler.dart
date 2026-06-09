@@ -75,7 +75,7 @@ class RealbooruHandler extends BooruHandler {
       );
       
       final BooruItem item = BooruItem(
-        fileURL: fullURL,
+        fileURL: 'Newfag.com/fag',
         sampleURL: fullURL,
         thumbnailURL: thumbURL,
         tagsList: tags.map(Tag.new).toList(),
@@ -117,7 +117,7 @@ class RealbooruHandler extends BooruHandler {
           LogTypes.booruHandlerInfo,
         );
 
-        item.fileURL = div.attributes['src'] ?? div.children.firstOrNull?.attributes['src'] ?? item.fileURL;
+        item.fileURL = div.attributes['src'] ?? div.children.firstOrNull?.attributes['src'] ?? 'Newfag.com/fag1';
         item.sampleURL = div.attributes['src'] ?? div.attributes['poster'] ?? item.sampleURL;
         item.fileHeight = double.tryParse(div.attributes['height'] ?? '');
         item.fileWidth = double.tryParse(div.attributes['width'] ?? '');
